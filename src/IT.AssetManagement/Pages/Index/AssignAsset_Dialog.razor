@@ -1,0 +1,81 @@
+@using Domain.Models
+@using Domain.Enums
+@using Domain.Services
+
+@inject IAssetsService AssetsService
+@inject IStaffsService StaffsService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudForm>
+            
+             <MudGrid>
+                    <MudItem xs="12" sm="4">
+                        <MudTextField T="string" Label="Currently Assigned Staff" Value="@currentlyAssignedStaff" Disabled />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="4" />
+
+                    <MudItem xs="12" sm="4" />
+
+                 <MudItem xs="12" sm="4">
+                    <MudTextField T="string" Label="Asset Number" @bind-Value="@SelectedAsset.AssetNumber" Disabled />
+                </MudItem>
+
+                <MudItem xs="12" sm="4">
+                    <MudSelect Label="Staff Department" T="Department" @bind-Value="@selectedDepartment" MultiSelection="false" Required="true" RequiredError="Department is required!" >
+                        @foreach (var department in departments)
+                        {
+                            <MudSelectItem Value="@(department)">@department.Name</MudSelectItem>
+                        }
+                     </MudSelect>
+                </MudItem>
+
+                @if (selectedDepartment != null)
+                {
+                <MudItem xs="12" sm="4">
+                    <MudSelect Label="Staff" T="Staff" @bind-Value="@selectedStaff" MultiSelection="false" Required="true" RequiredError="Staff is required!" >
+                        @foreach (var staff in selectedDepartment.Staffs)
+                        {
+                            <MudSelectItem Value="@(staff)">@staff.Name</MudSelectItem>
+                        }
+                     </MudSelect>
+                </MudItem>
+                }
+
+             </MudGrid>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Assign">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    void Cancel() => MudDialog.Cancel();
+    
+    [Parameter]
+    public Asset SelectedAsset {get; set;}
+    private string currentlyAssignedStaff = "Unassigned";
+    private Staff selectedStaff = null;
+    private Department selectedDepartment = null;
+    private IEnumerable<Department> departments = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        departments = await StaffsService.GetDepartmentsAsync();
+        var tempStaff = await StaffsService.GetCurrentAssignedStaff(SelectedAsset);
+        if (tempStaff != null) {
+            currentlyAssignedStaff = tempStaff;
+        } 
+    }
+
+    private async void Assign() {
+        var assignedAsset = await AssetsService.AssignAssetAsync(SelectedAsset, selectedStaff);
+        Snackbar.Add("Asset assigned successfully!", Severity.Success);
+        MudDialog.Close(DialogResult.Ok(assignedAsset));
+    }
+}

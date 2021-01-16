@@ -1,0 +1,112 @@
+@using Domain.Models
+@using Domain.Enums
+@using Domain.Services
+
+@inject IAssetsService AssetsService
+@inject IStaffsService StaffsService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudForm>
+             <MudGrid>
+                <MudItem xs="12" sm="4">
+                    <MudTextField T="string" Label="Asset Number" @bind-Value="@asset.AssetNumber" Disabled />
+                </MudItem>
+
+                <MudItem xs="12" sm="4">
+                    <MudSelect Label="Type" T="AssetType" @bind-Value="@selectedType" MultiSelection="false" Required="true" RequiredError="Asset Type required!" >
+                        @foreach (var type in types)
+                        {
+                            <MudSelectItem Value="@(type)">@type.Name</MudSelectItem>
+                        }
+                     </MudSelect>
+                </MudItem>
+
+                 <MudItem xs="12" sm="4">
+                   <MudSelect Label="Status" @bind-Value="@asset.Status" Required="true">
+                        @foreach (AssetStatus status in Enum.GetValues(typeof(AssetStatus)))
+                        {
+                            <MudSelectItem Value="@(status)">@status</MudSelectItem>
+                        }
+                     </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="4">
+                    <MudDatePicker Label="Purchased Date" DisableToolbar="true" @bind-Value="date" @ValueChanged="UpdateDate(date)" />
+                </MudItem>
+
+                @if (@asset.Status ==  AssetStatus.Assigned)
+                {
+                    <MudItem xs="12" sm="4">
+                   <MudSelect Label="Staff" T="Staff" @bind-Value="@selectedStaff" MultiSelection="false">
+                        @foreach (var staff in staffs)
+                        {
+                            <MudSelectItem Value="@(staff)">@staff.Name</MudSelectItem>
+                        }
+                     </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="4"></MudItem>
+
+                    @if (selectedStaff != null) {
+                        <MudItem xs="12" sm="4">Staff Details</MudItem>
+                        <MudItem xs="12" sm="4"></MudItem>
+                        <MudItem xs="12" sm="4"></MudItem>
+                        <MudItem xs="12" sm="4">
+                            <MudTextField T="string" Label="National ID Number" Value="@selectedStaff.NationalIdentificationNumber" Disabled />
+                        </MudItem>
+
+                        <MudItem xs="12" sm="4">
+                            <MudTextField T="string" Label="Department" Value="@selectedStaff.Department.Name" Disabled />
+                        </MudItem>
+
+                        <MudItem xs="12" sm="4">
+                            <MudDatePicker Label="Assigned Date" DisableToolbar="true" @bind-Value="assignedDate"/>
+                        </MudItem>
+                    }
+                }
+             </MudGrid>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Save">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
+
+    private Asset asset = new Asset();
+    private AssetType selectedType = null;
+    private Staff selectedStaff = null;
+    
+    private string date = DateTime.Now.ToString();
+    private string assignedDate = DateTime.Now.ToString();
+
+    private IEnumerable<AssetType> types = null;
+    private IEnumerable<Staff> staffs = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        asset.AssetNumber = await AssetsService.GenerateAssetNumberAsync();
+        types = await AssetsService.GetAssetTypesAsync();
+        staffs = await StaffsService.GetStaffsAsync();
+
+        asset.PurchasedDate = DateTime.Now;
+    }
+
+    private void updateDate(string date) {
+        asset.PurchasedDate = DateTime.Parse(date);
+    }
+
+    private async void Save() {
+        var savedAsset = await AssetsService.SaveNewAssetAsync(asset, selectedType, selectedStaff, assignedDate);
+         Snackbar.Add("Asset saved successfully!", Severity.Success);
+        MudDialog.Close(DialogResult.Ok(savedAsset));
+    }
+}

@@ -1,0 +1,61 @@
+@using Domain.Models
+@using Domain.Services
+
+@inject IAssetsService AssetsService
+@inject IStaffsService StaffsService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudForm>
+             <MudGrid>
+                <MudItem xs="12" sm="4">
+                    <MudTextField T="string" Label="Staff Number" @bind-Value="@staff.StaffNumber" Required="true" RequiredError="Staff Number required!"/>
+                </MudItem>
+
+                <MudItem xs="12" sm="4">
+                    <MudTextField T="string" Label="Name" @bind-Value="@staff.Name" Required="true" RequiredError="Staff Name required!"/>
+                </MudItem>
+
+                <MudItem xs="12" sm="4">
+                    <MudTextField T="string" Label="National ID Number" @bind-Value="@staff.NationalIdentificationNumber" Required="true" RequiredError="NID required!"/>
+                </MudItem>
+
+                <MudItem xs="12" sm="4">
+                    <MudSelect Label="Department" T="Department" @bind-Value="@selectedDepartment" MultiSelection="false" Required="true" RequiredError="Department is required!" >
+                        @foreach (var department in departments)
+                        {
+                            <MudSelectItem Value="@(department)">@department.Name</MudSelectItem>
+                        }
+                     </MudSelect>
+                </MudItem>
+
+             </MudGrid>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Save">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    void Cancel() => MudDialog.Cancel();
+
+    private Staff staff = new Staff();
+    private Department selectedDepartment = null;
+
+    private IEnumerable<Department> departments = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        departments = await StaffsService.GetDepartmentsAsync();
+    }
+
+    private async void Save() {
+        var savedAsset = await StaffsService.SaveNewStaffAsync(staff, selectedDepartment);
+        Snackbar.Add("Staff added successfully!", Severity.Success);
+        MudDialog.Close(DialogResult.Ok(savedAsset));
+    }
+}

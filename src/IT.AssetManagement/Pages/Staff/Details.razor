@@ -1,0 +1,118 @@
+@page "/staff/{id:int}"
+
+@using System.Linq;
+@using Domain.Models
+@using Domain.Enums
+@using Domain.Services
+
+@inject IStaffsService StaffsService
+@inject IAssetsService AssetsService
+@inject IDialogService Dialog
+@inject ISnackbar Snackbar
+
+<MudCard class="mt-5 ml-5 mb-5 mr-5" Elevation="5">
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Staff Details</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudGrid>
+            <MudItem xs="12" sm="3">
+                <MudField T="string" Label="Staff Number">@staff.StaffNumber</MudField>
+            </MudItem>
+
+            <MudItem xs="12" sm="3">
+                <MudField T="string" Label="Name">@staff.Name</MudField>
+            </MudItem>
+
+            <MudItem xs="12" sm="3">
+                <MudField T="string" Label="National ID Number">@staff.NationalIdentificationNumber</MudField>
+            </MudItem>
+
+            <MudItem xs="12" sm="3">
+                <MudField T="string" Label="Department">@staff.Department.Name</MudField>
+            </MudItem>
+        </MudGrid>
+    </MudCardContent>
+</MudCard>
+
+@if (staff.Assets.Any() != false)
+{
+    <MudTable  class="mt-5 ml-5 mb-5 mr-5" Elevation="5" Items="@history" Hover="true">
+
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Assigned Assets</MudText>
+        <MudToolBarSpacer />
+
+        <MudTextField @bind-Value="searchString" Placeholder="Enter search term and press enter" Adornment="Adornment.Start"
+            AdornmentIcon="@Icons.Material.Search" IconSize="Size.Medium" Class="mt-0 mr-5"></MudTextField>
+    </ToolBarContent>
+
+    <HeaderContent>
+        <MudTh>Asset Number</MudTh>
+        <MudTh>Type</MudTh>
+        <MudTh>Current Status</MudTh>
+        <MudTh>Assigned Date</MudTh>
+        <MudTh>Unassigned Date</MudTh>
+        <MudTh>Actions</MudTh>
+    </HeaderContent>
+
+    <RowTemplate>
+         <MudTd DataLabel="Asset Number">@context.Asset.AssetNumber</MudTd> 
+         <MudTd DataLabel="Type">@context.Asset.Type.Name</MudTd> 
+         <MudTd DataLabel="Type">@context.Asset.Status</MudTd> 
+        <MudTd DataLabel="Assigned Date">@context.AssignedDate</MudTd> 
+         <MudTd DataLabel="Unassigned Date">@context.UnAssignedDate</MudTd> 
+        <MudTd> 
+            @if (context.Asset.Status!= AssetStatus.Discarded)
+            {
+                <MudBlazor.MudIcon Icon="@Icons.Material.RemoveCircle" class="action-btn" @onclick="() => Unassign(context)"/> 
+            }
+        </MudTd>
+    </RowTemplate>
+
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+
+</MudTable>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private string searchString = "";
+
+    private Staff staff = null;
+    private ICollection<AssetHistory> history = null;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        staff = await StaffsService.GetStaffDetails(Id);
+        history = await StaffsService.GetAssetHistoryAsync(staff);
+    }
+
+    private async void Unassign(AssetHistory asset) {
+        var parameters = new DialogParameters();
+        parameters.Add("ContentText", "Do you really want to unassign this asset?");
+        parameters.Add("ButtonText", "Unassign");
+        parameters.Add("Color", Color.Error);
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+        
+        var dialog = Dialog.Show<Dialog>("Delete", parameters, options);
+        
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {   
+            Snackbar.Add("Unassigned successfully!", Severity.Warning);
+           await StaffsService.Unassign(asset); 
+           history.Clear();
+           history = await StaffsService.GetAssetHistoryAsync(staff);
+        }
+        this.StateHasChanged();
+    }
+}

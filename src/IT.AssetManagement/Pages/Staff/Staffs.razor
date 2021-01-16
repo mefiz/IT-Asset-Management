@@ -1,0 +1,93 @@
+@page "/staffs"
+
+@using Domain.Models
+@using Domain.Enums
+@using Domain.Services
+
+@inject IStaffsService StaffsService
+@inject IAssetsService AssetsService
+@inject IDialogService Dialog
+@inject NavigationManager NavManager
+
+<MudTable  class="mt-5 ml-5 mb-5 mr-5" Elevation="5" Items="@staffs" Hover="true" Filter="new Func<Staff,bool>(FilterFunc)">
+
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Staffs</MudText>
+        <MudToolBarSpacer />
+
+        <MudTextField @bind-Value="searchString" Placeholder="Enter search term and press enter" Adornment="Adornment.Start"
+            AdornmentIcon="@Icons.Material.Search" IconSize="Size.Medium" Class="mt-0 mr-5"></MudTextField>
+
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" class="mr-3 ml-3" @onclick="OpenNewStaffDialog">
+            <MudBlazor.MudIcon Icon="@Icons.Material.Add"></MudBlazor.MudIcon>Add Staff
+        </MudButton>
+    </ToolBarContent>
+
+    <HeaderContent>
+        <MudTh>Staff Number</MudTh>
+        <MudTh>Name</MudTh>
+        <MudTh>National ID</MudTh>
+        <MudTh>Department</MudTh>
+        <MudTh>Actions</MudTh>
+    </HeaderContent>
+
+    <RowTemplate>
+        <MudTd DataLabel="Staff Number">@context.StaffNumber</MudTd>
+        <MudTd DataLabel="Name">@context.Name</MudTd>
+        <MudTd DataLabel="National ID">@context.NationalIdentificationNumber</MudTd>
+        <MudTd DataLabel="Department">@context.Department.Name</MudTd>
+        <MudTd> 
+            
+            <MudBlazor.MudIcon Icon="@Icons.Material.Pageview" class="action-btn" @onclick="() => ViewDetails(context.Id)"/> 
+            
+        </MudTd>
+    </RowTemplate>
+
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+
+</MudTable>
+
+@code {
+    private string searchString = "";
+    private ICollection<Staff> staffs = null;
+
+    protected override async Task OnInitializedAsync()
+    {   
+        staffs = await StaffsService.GetStaffsAsync();
+    }
+
+    private bool FilterFunc(Staff staff)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (staff.StaffNumber.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (staff.Name.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (staff.NationalIdentificationNumber.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (staff.Department.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    
+    private void ViewDetails(int id) {
+        Console.WriteLine(id);
+        NavManager.NavigateTo("/staff/" + id);
+    }
+
+      private async void OpenNewStaffDialog() {
+        var dialog = Dialog.Show<NewStaff_Dialog>("New Asset", new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true });
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+           staffs.Clear();
+           staffs = await StaffsService.GetStaffsAsync();
+        }
+        this.StateHasChanged();
+    }
+}   
