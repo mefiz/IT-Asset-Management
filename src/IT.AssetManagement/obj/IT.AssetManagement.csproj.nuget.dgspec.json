@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/home/mefiz/Projects/dotNet/IT.AssetManagement/IT.AssetManagement.csproj": {}
+    "/Users/mubah/Projects/IT-Asset-Management/src/IT.AssetManagement/IT.AssetManagement.csproj": {}
   },
   "projects": {
-    "/home/mefiz/Projects/dotNet/IT.AssetManagement/IT.AssetManagement.csproj": {
+    "/Users/mubah/Projects/IT-Asset-Management/src/IT.AssetManagement/IT.AssetManagement.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/mefiz/Projects/dotNet/IT.AssetManagement/IT.AssetManagement.csproj",
+        "projectUniqueName": "/Users/mubah/Projects/IT-Asset-Management/src/IT.AssetManagement/IT.AssetManagement.csproj",
         "projectName": "IT.AssetManagement",
-        "projectPath": "/home/mefiz/Projects/dotNet/IT.AssetManagement/IT.AssetManagement.csproj",
-        "packagesPath": "/home/mefiz/.nuget/packages/",
-        "outputPath": "/home/mefiz/Projects/dotNet/IT.AssetManagement/obj/",
+        "projectPath": "/Users/mubah/Projects/IT-Asset-Management/src/IT.AssetManagement/IT.AssetManagement.csproj",
+        "packagesPath": "/Users/mubah/.nuget/packages/",
+        "outputPath": "/Users/mubah/Projects/IT-Asset-Management/src/IT.AssetManagement/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/mefiz/.nuget/NuGet/NuGet.Config"
+          "/Users/mubah/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net5.0"
@@ -75,7 +75,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/5.0.101/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/5.0.101/RuntimeIdentifierGraph.json"
         }
       }
     }

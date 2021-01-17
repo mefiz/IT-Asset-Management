@@ -20,7 +20,7 @@ namespace Domain.Services
         public async Task<ICollection<AssetHistory>> GetAssetHistoryAsync(Staff staff)
         {
             return await _context.AssetsHistory.AsNoTracking().Where(h => h.Staff == staff)
-                .Include(h => h.Asset).Include(h => h.Asset.Type)
+                .Include(h => h.Asset).AsNoTracking().Include(h => h.Asset.Type)
                 .ToListAsync();
         }
 

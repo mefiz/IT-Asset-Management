@@ -54,7 +54,7 @@ namespace Domain.Services
 
             var today = new DateTime(year, month, day);
 
-            int count = await _context.Assets.Where(b => b.PurchasedDate.Date == today).CountAsync();
+            int count = await _context.Assets.AsNoTracking().Where(b => b.PurchasedDate.Date == today).CountAsync();
             count = count + 1;
 
 
