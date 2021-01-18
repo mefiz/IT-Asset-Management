@@ -128,15 +128,22 @@ using Domain.Services;
 
     private IEnumerable<Department> departments = null;
 
+    MudForm form;
+
     protected override async Task OnInitializedAsync()
     {
         departments = await StaffsService.GetDepartmentsAsync();
     }
 
     private async void Save() {
-        var savedAsset = await StaffsService.SaveNewStaffAsync(staff, selectedDepartment);
-        Snackbar.Add("Staff added successfully!", Severity.Success);
-        MudDialog.Close(DialogResult.Ok(savedAsset));
+        form.Validate();
+
+        if(form.IsValid)
+        {
+            var savedStaff = await StaffsService.SaveNewStaffAsync(staff, selectedDepartment);
+            Snackbar.Add("Staff added successfully!", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(savedStaff));
+        }
     }
 
 #line default

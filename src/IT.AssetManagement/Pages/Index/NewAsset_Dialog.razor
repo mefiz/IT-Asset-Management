@@ -8,14 +8,14 @@
 
 <MudDialog>
     <DialogContent>
-        <MudForm>
+        <MudForm @ref=form >
              <MudGrid>
                 <MudItem xs="12" sm="4">
                     <MudTextField T="string" Label="Asset Number" @bind-Value="@asset.AssetNumber" Disabled />
                 </MudItem>
 
                 <MudItem xs="12" sm="4">
-                    <MudSelect Label="Type" T="AssetType" @bind-Value="@selectedType" MultiSelection="false" Required="true" RequiredError="Asset Type required!" >
+                    <MudSelect Label="Type" T="AssetType" @bind-Value="@selectedType" MultiSelection="false" Required="true" RequiredError="Asset type is required!" >
                         @foreach (var type in types)
                         {
                             <MudSelectItem Value="@(type)">@type.Name</MudSelectItem>
@@ -24,7 +24,7 @@
                 </MudItem>
 
                  <MudItem xs="12" sm="4">
-                   <MudSelect Label="Status" @bind-Value="@asset.Status" Required="true">
+                   <MudSelect Label="Status" @bind-Value="@asset.Status" Required="true" RequiredError="Asset status is required!">
                         @foreach (AssetStatus status in Enum.GetValues(typeof(AssetStatus)))
                         {
                             <MudSelectItem Value="@(status)">@status</MudSelectItem>
@@ -33,13 +33,13 @@
                 </MudItem>
 
                 <MudItem xs="12" sm="4">
-                    <MudDatePicker Label="Purchased Date" DisableToolbar="true" @bind-Value="date" @ValueChanged="UpdateDate(date)" />
+                    <MudDatePicker Label="Purchased Date" DisableToolbar="true" @bind-Value="date" @ValueChanged="UpdateDate(date)" Required="true" RequiredError="Purchased date is required!" />
                 </MudItem>
 
                 @if (@asset.Status ==  AssetStatus.Assigned)
                 {
                     <MudItem xs="12" sm="4">
-                   <MudSelect Label="Staff" T="Staff" @bind-Value="@selectedStaff" MultiSelection="false">
+                   <MudSelect Label="Staff" T="Staff" @bind-Value="@selectedStaff" MultiSelection="false" Required="true" RequiredError="Staff is required!">
                         @foreach (var staff in staffs)
                         {
                             <MudSelectItem Value="@(staff)">@staff.Name</MudSelectItem>
@@ -71,7 +71,7 @@
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Save">Ok</MudButton>
+        <MudButton Color="Color.Primary" OnClick="@(() => Save())">Ok</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -84,12 +84,14 @@
     private Asset asset = new Asset();
     private AssetType selectedType = null;
     private Staff selectedStaff = null;
-    
+
     private string date = DateTime.Now.ToString();
     private string assignedDate = DateTime.Now.ToString();
 
     private IEnumerable<AssetType> types = null;
     private IEnumerable<Staff> staffs = null;
+
+    MudForm form;
 
     protected override async Task OnInitializedAsync()
     {
@@ -105,8 +107,13 @@
     }
 
     private async void Save() {
-        var savedAsset = await AssetsService.SaveNewAssetAsync(asset, selectedType, selectedStaff, assignedDate);
-         Snackbar.Add("Asset saved successfully!", Severity.Success);
-        MudDialog.Close(DialogResult.Ok(savedAsset));
+        form.Validate();
+
+        if (form.IsValid)
+        {
+            var savedAsset = await AssetsService.SaveNewAssetAsync(asset, selectedType, selectedStaff, assignedDate);
+            Snackbar.Add("Asset saved successfully!", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(savedAsset));
+        }
     }
 }

@@ -129,27 +129,36 @@ using Domain.Services;
        
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
     void Cancel() => MudDialog.Cancel();
-    
+
     [Parameter]
-    public Asset SelectedAsset {get; set;}
+    public Asset selectedAsset { get; set; }
     private string currentlyAssignedStaff = "Unassigned";
     private Staff selectedStaff = null;
     private Department selectedDepartment = null;
     private IEnumerable<Department> departments = null;
 
+    bool success;
+    string[] errors = { };
+    MudForm form;
+
     protected override async Task OnInitializedAsync()
     {
         departments = await StaffsService.GetDepartmentsAsync();
-        var tempStaff = await StaffsService.GetCurrentAssignedStaff(SelectedAsset);
-        if (tempStaff != null) {
+        var tempStaff = await StaffsService.GetCurrentAssignedStaff(selectedAsset);
+        if (tempStaff != null)
+        {
             currentlyAssignedStaff = tempStaff;
-        } 
+        }
     }
 
-    private async void Assign() {
-        var assignedAsset = await AssetsService.AssignAssetAsync(SelectedAsset, selectedStaff);
+    private async void Assign()
+    {
+        form.Validate();
+
+        var assignedAsset = await AssetsService.AssignAssetAsync(selectedAsset, selectedStaff);
         Snackbar.Add("Asset assigned successfully!", Severity.Success);
         MudDialog.Close(DialogResult.Ok(assignedAsset));
+
     }
 
 #line default

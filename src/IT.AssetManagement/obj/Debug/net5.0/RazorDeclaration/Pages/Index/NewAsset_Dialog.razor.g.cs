@@ -135,12 +135,14 @@ using Domain.Services;
     private Asset asset = new Asset();
     private AssetType selectedType = null;
     private Staff selectedStaff = null;
-    
+
     private string date = DateTime.Now.ToString();
     private string assignedDate = DateTime.Now.ToString();
 
     private IEnumerable<AssetType> types = null;
     private IEnumerable<Staff> staffs = null;
+
+    MudForm form;
 
     protected override async Task OnInitializedAsync()
     {
@@ -156,9 +158,14 @@ using Domain.Services;
     }
 
     private async void Save() {
-        var savedAsset = await AssetsService.SaveNewAssetAsync(asset, selectedType, selectedStaff, assignedDate);
-         Snackbar.Add("Asset saved successfully!", Severity.Success);
-        MudDialog.Close(DialogResult.Ok(savedAsset));
+        form.Validate();
+
+        if (form.IsValid)
+        {
+            var savedAsset = await AssetsService.SaveNewAssetAsync(asset, selectedType, selectedStaff, assignedDate);
+            Snackbar.Add("Asset saved successfully!", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(savedAsset));
+        }
     }
 
 #line default

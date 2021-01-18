@@ -7,18 +7,18 @@
 
 <MudDialog>
     <DialogContent>
-        <MudForm>
+        <MudForm @ref="form">
              <MudGrid>
                 <MudItem xs="12" sm="4">
-                    <MudTextField T="string" Label="Staff Number" @bind-Value="@staff.StaffNumber" Required="true" RequiredError="Staff Number required!"/>
+                    <MudTextField T="string" Label="Staff Number" @bind-Value="@staff.StaffNumber" Required="true" RequiredError="Staff number is required!"/>
                 </MudItem>
 
                 <MudItem xs="12" sm="4">
-                    <MudTextField T="string" Label="Name" @bind-Value="@staff.Name" Required="true" RequiredError="Staff Name required!"/>
+                    <MudTextField T="string" Label="Name" @bind-Value="@staff.Name" Required="true" RequiredError="Staff name is required!"/>
                 </MudItem>
 
                 <MudItem xs="12" sm="4">
-                    <MudTextField T="string" Label="National ID Number" @bind-Value="@staff.NationalIdentificationNumber" Required="true" RequiredError="NID required!"/>
+                    <MudTextField T="string" Label="National ID Number" @bind-Value="@staff.NationalIdentificationNumber" Required="true" RequiredError="NID is required!"/>
                 </MudItem>
 
                 <MudItem xs="12" sm="4">
@@ -35,7 +35,7 @@
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Save">Ok</MudButton>
+        <MudButton Color="Color.Primary" OnClick="@(() => Save())">Ok</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -48,14 +48,21 @@
 
     private IEnumerable<Department> departments = null;
 
+    MudForm form;
+
     protected override async Task OnInitializedAsync()
     {
         departments = await StaffsService.GetDepartmentsAsync();
     }
 
     private async void Save() {
-        var savedAsset = await StaffsService.SaveNewStaffAsync(staff, selectedDepartment);
-        Snackbar.Add("Staff added successfully!", Severity.Success);
-        MudDialog.Close(DialogResult.Ok(savedAsset));
+        form.Validate();
+
+        if(form.IsValid)
+        {
+            var savedStaff = await StaffsService.SaveNewStaffAsync(staff, selectedDepartment);
+            Snackbar.Add("Staff added successfully!", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(savedStaff));
+        }
     }
 }
