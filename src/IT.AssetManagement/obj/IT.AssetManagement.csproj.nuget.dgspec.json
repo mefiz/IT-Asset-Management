@@ -14,7 +14,7 @@
         "outputPath": "/Users/mubah/Projects/IT-Asset-Management/src/IT.AssetManagement/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/mubah/.nuget/NuGet/NuGet.Config"
+          "/Users/mubah/.config/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net5.0"
@@ -75,7 +75,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/5.0.101/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/5.0.102/RuntimeIdentifierGraph.json"
         }
       }
     }

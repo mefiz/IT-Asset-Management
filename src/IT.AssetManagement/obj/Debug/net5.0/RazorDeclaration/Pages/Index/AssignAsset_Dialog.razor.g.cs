@@ -155,9 +155,12 @@ using Domain.Services;
     {
         form.Validate();
 
-        var assignedAsset = await AssetsService.AssignAssetAsync(selectedAsset, selectedStaff);
-        Snackbar.Add("Asset assigned successfully!", Severity.Success);
-        MudDialog.Close(DialogResult.Ok(assignedAsset));
+        if (form.IsValid)
+        {
+            var assignedAsset = await AssetsService.AssignAssetAsync(selectedAsset, selectedStaff);
+            Snackbar.Add("Asset assigned successfully!", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(assignedAsset));
+        }
 
     }
 
